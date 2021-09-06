@@ -32,6 +32,7 @@
 #define CRASH_HANDLER_WINDOWS_H
 
 #include <windows.h>
+#include <string>
 
 // Crash handler exception only enabled with MSVC
 #if defined(DEBUG_ENABLED) && defined(MSVC)

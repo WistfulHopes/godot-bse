@@ -1,8 +1,8 @@
 short_name = "godot"
 name = "Godot Engine"
 major = 1
-minor = 1
-patch = 2
+minor = 0
+patch = 0
 status = "stable"
 module_config = ""
 year = 2019

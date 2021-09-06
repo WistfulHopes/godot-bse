@@ -1795,7 +1795,7 @@ Error ResourceFormatSaverBinaryInstance::save(const String &p_path, const RES &p
 		f->store_32(0);
 
 	f->store_32(0); //64 bits file, false for now
-	f->store_32(1);
+	f->store_32(VERSION_MAJOR);
 	f->store_32(VERSION_MINOR);
 	f->store_32(FORMAT_VERSION);
 

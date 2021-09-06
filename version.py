@@ -1,6 +1,6 @@
 short_name = "godot"
 name = "Godot Engine"
-major = 3
+major = 1
 minor = 1
 patch = 2
 status = "stable"

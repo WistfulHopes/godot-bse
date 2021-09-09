@@ -399,6 +399,7 @@ GeometryInstance::GeometryInstance() {
 	}
 
 	shadow_casting_setting = SHADOW_CASTING_SETTING_ON;
+	character_shadow_casting_setting = SHADOW_CASTING_SETTING_OFF;
 	extra_cull_margin = 0;
 	generate_lightmap = true;
 	lightmap_scale = LightmapScale::LIGHTMAP_SCALE_1X;

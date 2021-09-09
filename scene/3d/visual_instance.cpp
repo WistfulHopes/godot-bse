@@ -284,6 +284,19 @@ GeometryInstance::ShadowCastingSetting GeometryInstance::get_cast_shadows_settin
 	return shadow_casting_setting;
 }
 
+void GeometryInstance::set_cast_character_shadows_setting(ShadowCastingSetting p_shadow_casting_setting) {
+
+	character_shadow_casting_setting = p_shadow_casting_setting;
+
+	//TODO: See if it's necessary to report this to the VS Singleton later.
+	//VS::get_singleton()->instance_geometry_set_cast_shadows_setting(get_instance(), (VS::ShadowCastingSetting)p_shadow_casting_setting);
+}
+
+GeometryInstance::ShadowCastingSetting GeometryInstance::get_cast_character_shadows_setting() const {
+
+	return character_shadow_casting_setting;
+}
+
 void GeometryInstance::set_extra_cull_margin(float p_margin) {
 
 	ERR_FAIL_COND(p_margin < 0);
@@ -311,6 +324,9 @@ void GeometryInstance::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_cast_shadows_setting", "shadow_casting_setting"), &GeometryInstance::set_cast_shadows_setting);
 	ClassDB::bind_method(D_METHOD("get_cast_shadows_setting"), &GeometryInstance::get_cast_shadows_setting);
+	
+	ClassDB::bind_method(D_METHOD("set_cast_character_shadows_setting", "character_shadow_casting_setting"), &GeometryInstance::set_cast_character_shadows_setting);
+	ClassDB::bind_method(D_METHOD("get_cast_character_shadows_setting"), &GeometryInstance::get_cast_character_shadows_setting);
 
 	ClassDB::bind_method(D_METHOD("set_generate_lightmap", "enabled"), &GeometryInstance::set_generate_lightmap);
 	ClassDB::bind_method(D_METHOD("get_generate_lightmap"), &GeometryInstance::get_generate_lightmap);
@@ -340,6 +356,7 @@ void GeometryInstance::_bind_methods() {
 	ADD_GROUP("Geometry", "");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "material_override", PROPERTY_HINT_RESOURCE_TYPE, "ShaderMaterial,SpatialMaterial"), "set_material_override", "get_material_override");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "cast_shadow", PROPERTY_HINT_ENUM, "Off,On,Double-Sided,Shadows Only"), "set_cast_shadows_setting", "get_cast_shadows_setting");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "cast_character_shadow", PROPERTY_HINT_ENUM, "Off,On,Double-Sided,Shadows Only"), "set_cast_character_shadows_setting", "get_cast_character_shadows_setting");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "extra_cull_margin", PROPERTY_HINT_RANGE, "0,16384,0.01"), "set_extra_cull_margin", "get_extra_cull_margin");
 
 	ADD_GROUP("Baked Light", "");

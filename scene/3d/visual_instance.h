@@ -102,6 +102,7 @@ public:
 private:
 	bool flags[FLAG_MAX];
 	ShadowCastingSetting shadow_casting_setting;
+	ShadowCastingSetting character_shadow_casting_setting;
 	Ref<Material> material_override;
 	float lod_min_distance;
 	float lod_max_distance;
@@ -120,6 +121,9 @@ public:
 
 	void set_cast_shadows_setting(ShadowCastingSetting p_shadow_casting_setting);
 	ShadowCastingSetting get_cast_shadows_setting() const;
+	
+	void set_cast_character_shadows_setting(ShadowCastingSetting p_shadow_casting_setting);
+	ShadowCastingSetting get_cast_character_shadows_setting() const;
 
 	void set_lod_min_distance(float p_dist);
 	float get_lod_min_distance() const;

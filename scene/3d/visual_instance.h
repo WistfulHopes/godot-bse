@@ -111,6 +111,7 @@ private:
 	bool generate_lightmap;
 	LightmapScale lightmap_scale;
 	ShadowCastingSetting shadow_casting_setting;
+	ShadowCastingSetting character_shadow_casting_setting;
 	Ref<Material> material_override;
 	float lod_min_distance;
 	float lod_max_distance;
@@ -129,6 +130,9 @@ public:
 
 	void set_cast_shadows_setting(ShadowCastingSetting p_shadow_casting_setting);
 	ShadowCastingSetting get_cast_shadows_setting() const;
+	
+	void set_cast_character_shadows_setting(ShadowCastingSetting p_shadow_casting_setting);
+	ShadowCastingSetting get_cast_character_shadows_setting() const;
 
 	void set_bake_cast_shadows(bool p_enabled);
 	bool get_bake_cast_shadows();

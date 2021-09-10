@@ -349,7 +349,7 @@ GeometryInstance::GeometryInstance() {
 		flags[i] = false;
 	}
 
-	shadow_casting_setting = SHADOW_CASTING_SETTING_ON;
+	shadow_casting_setting = SHADOW_CASTING_SETTING_OFF;
 	character_shadow_casting_setting = SHADOW_CASTING_SETTING_OFF;
 	extra_cull_margin = 0;
 	//VS::get_singleton()->instance_geometry_set_baked_light_texture_index(get_instance(),0);

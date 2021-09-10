@@ -327,12 +327,15 @@ void GeometryInstance::_bind_methods() {
 	
 	ClassDB::bind_method(D_METHOD("set_cast_character_shadows_setting", "character_shadow_casting_setting"), &GeometryInstance::set_cast_character_shadows_setting);
 	ClassDB::bind_method(D_METHOD("get_cast_character_shadows_setting"), &GeometryInstance::get_cast_character_shadows_setting);
+<<<<<<< HEAD
 
 	ClassDB::bind_method(D_METHOD("set_generate_lightmap", "enabled"), &GeometryInstance::set_generate_lightmap);
 	ClassDB::bind_method(D_METHOD("get_generate_lightmap"), &GeometryInstance::get_generate_lightmap);
 
 	ClassDB::bind_method(D_METHOD("set_lightmap_scale", "scale"), &GeometryInstance::set_lightmap_scale);
 	ClassDB::bind_method(D_METHOD("get_lightmap_scale"), &GeometryInstance::get_lightmap_scale);
+=======
+>>>>>>> 1e3e3af24c (Merge pull request #2 from DarioSamo/bse)
 
 	ClassDB::bind_method(D_METHOD("set_lod_max_hysteresis", "mode"), &GeometryInstance::set_lod_max_hysteresis);
 	ClassDB::bind_method(D_METHOD("get_lod_max_hysteresis"), &GeometryInstance::get_lod_max_hysteresis);

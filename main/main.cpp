@@ -407,6 +407,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	String debug_host;
 	bool skip_breakpoints = false;
 	String main_pack;
+	bool enable_multipack = false;
 	bool quiet_stdout = false;
 	int rtm = -1;
 
@@ -801,7 +802,10 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 				goto error;
 			};
 
-		} else if (I->get() == "-d" || I->get() == "--debug") {
+		} else if (I->get() == "--multi-pack") {
+			enable_multipack = true;
+		}
+		else if (I->get() == "-d" || I->get() == "--debug") {
 			debug_mode = "local";
 			OS::get_singleton()->_debug_stdout = true;
 #if defined(DEBUG_ENABLED) && !defined(SERVER_ENABLED)
@@ -886,7 +890,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 		FileAccess::make_default<FileAccessNetwork>(FileAccess::ACCESS_RESOURCES);
 	}
 
-	if (globals->setup(project_path, main_pack, upwards) == OK) {
+	if (globals->setup(project_path, main_pack, upwards, enable_multipack) == OK) {
 #ifdef TOOLS_ENABLED
 		found_project = true;
 #endif
@@ -956,7 +960,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 #ifdef TOOLS_ENABLED
 	if (editor) {
-		packed_data->set_disabled(true);
+		if (main_pack == "") packed_data->set_disabled(true);
 		globals->set_disable_feature_overrides(true);
 	}
 

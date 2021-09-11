@@ -302,6 +302,10 @@ void ProjectSettings::_convert_to_last_version(int p_from_version) {
 	}
 }
 
+Error ProjectSettings::_setup(const String &p_path, const String &p_main_pack, bool p_upwards) {
+	return _setup(p_path, p_main_pack, p_upwards, false);
+}
+
 /*
  * This method is responsible for loading a project.godot file and/or data file
  * using the following merit order:
@@ -327,7 +331,7 @@ void ProjectSettings::_convert_to_last_version(int p_from_version) {
  *    If a project file is found, load it or fail.
  *    If nothing was found, error out.
  */
-Error ProjectSettings::_setup(const String &p_path, const String &p_main_pack, bool p_upwards) {
+Error ProjectSettings::_setup(const String &p_path, const String &p_main_pack, bool p_upwards, bool p_multi_pack) {
 
 	// If looking for files in a network client, use it directly
 
@@ -345,9 +349,39 @@ Error ProjectSettings::_setup(const String &p_path, const String &p_main_pack, b
 
 	if (p_main_pack != "") {
 
-		bool ok = _load_resource_pack(p_main_pack);
-		ERR_FAIL_COND_V_MSG(!ok, ERR_CANT_OPEN, "Cannot open resource pack '" + p_main_pack + "'.");
+		if (!p_multi_pack) {
+			bool ok = _load_resource_pack(p_main_pack);
+			ERR_FAIL_COND_V(!ok, ERR_CANT_OPEN);
+		}else {
+			DirAccessRef dir = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
+			Error err = dir->change_dir(p_main_pack);
+			ERR_FAIL_COND_V(err != OK, ERR_CANT_OPEN);
 
+			err = dir->list_dir_begin();
+
+			ERR_FAIL_COND_V(err != OK, ERR_CANT_OPEN);
+
+			String currentFile = dir->get_next();
+
+			while (currentFile != "") {
+				if (!currentFile.ends_with(".pck") || dir->current_is_dir()) {
+					currentFile = dir->get_next();
+					continue;
+				}
+
+				printf("Add pack: %ls\n", currentFile.c_str());
+				PackedData::get_singleton()->add_pack(currentFile);
+				currentFile = dir->get_next();
+			}
+
+			using_datapack = true;
+			PackedData::get_singleton()->set_disabled(false);
+			DirAccess::make_default<DirAccessPack>(DirAccess::ACCESS_RESOURCES);
+			
+			dir->list_dir_end();
+		}
+		
+		
 		Error err = _load_settings_text_or_binary("res://project.godot", "res://project.binary");
 		if (err == OK) {
 			// Load override from location of the main pack
@@ -474,8 +508,8 @@ Error ProjectSettings::_setup(const String &p_path, const String &p_main_pack, b
 	return OK;
 }
 
-Error ProjectSettings::setup(const String &p_path, const String &p_main_pack, bool p_upwards) {
-	Error err = _setup(p_path, p_main_pack, p_upwards);
+Error ProjectSettings::setup(const String &p_path, const String &p_main_pack, bool p_upwards, bool p_multi_pack) {
+	Error err = _setup(p_path, p_main_pack, p_upwards, p_multi_pack);
 	if (err == OK) {
 		String custom_settings = GLOBAL_DEF("application/config/project_settings_override", "");
 		if (custom_settings != "") {

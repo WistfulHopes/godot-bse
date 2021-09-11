@@ -377,6 +377,7 @@ Error ProjectSettings::_setup(const String &p_path, const String &p_main_pack, b
 			using_datapack = true;
 			PackedData::get_singleton()->set_disabled(false);
 			DirAccess::make_default<DirAccessPack>(DirAccess::ACCESS_RESOURCES);
+			resource_path = p_main_pack;
 			
 			dir->list_dir_end();
 		}

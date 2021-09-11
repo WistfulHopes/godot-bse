@@ -957,7 +957,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 			script_debugger->insert_breakpoint(bp.substr(sp + 1, bp.length()).to_int(), bp.substr(0, sp));
 		}
 	}
-
+	
 #ifdef TOOLS_ENABLED
 	if (editor) {
 		if (main_pack == "") packed_data->set_disabled(true);

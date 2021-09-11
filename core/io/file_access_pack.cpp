@@ -406,7 +406,8 @@ Error DirAccessPack::change_dir(String p_dir) {
 		absolute = true;
 	}
 
-	nd = nd.simplify_path();
+	if (nd != ".." && nd != ".")
+		nd = nd.simplify_path();
 
 	if (nd == "") nd = ".";
 

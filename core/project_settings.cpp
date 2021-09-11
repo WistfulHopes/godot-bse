@@ -53,7 +53,11 @@ ProjectSettings *ProjectSettings::get_singleton() {
 String ProjectSettings::get_resource_path() const {
 
 	return resource_path;
-};
+}
+
+void ProjectSettings::set_resource_path(const String &p_path){
+	resource_path = p_path;
+}
 
 String ProjectSettings::localize_path(const String &p_path) const {
 
@@ -355,7 +359,6 @@ Error ProjectSettings::_setup(const String &p_path, const String &p_main_pack, b
 			using_datapack = true;
 			PackedData::get_singleton()->set_disabled(false);
 			DirAccess::make_default<DirAccessPack>(DirAccess::ACCESS_RESOURCES);
-			resource_path = p_main_pack;
 			
 			dir->list_dir_end();
 		}

@@ -407,6 +407,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	String debug_host;
 	bool skip_breakpoints = false;
 	String main_pack;
+	String resource_path;
 	bool enable_multipack = false;
 	bool quiet_stdout = false;
 	int rtm = -1;
@@ -800,8 +801,16 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 			} else {
 				OS::get_singleton()->print("Missing path to main pack file, aborting.\n");
 				goto error;
-			};
+			}
 
+		} else if (I->get() == "--res-path") {
+			if (I->next()) {
+				resource_path = I->next()->get();
+				N = I->next()->next();
+			} else {
+				OS::get_singleton()->print("Missing path to resource, aborting.\n");
+				goto error;
+			}
 		} else if (I->get() == "--multi-pack") {
 			enable_multipack = true;
 		}
@@ -890,6 +899,10 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 		FileAccess::make_default<FileAccessNetwork>(FileAccess::ACCESS_RESOURCES);
 	}
 
+	if (!resource_path.empty()) {
+		globals->set_resource_path(resource_path);
+	}
+	
 	if (globals->setup(project_path, main_pack, upwards, enable_multipack) == OK) {
 #ifdef TOOLS_ENABLED
 		found_project = true;

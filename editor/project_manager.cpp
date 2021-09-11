@@ -95,6 +95,7 @@ private:
 	Container *rasterizer_container;
 	Ref<ButtonGroup> rasterizer_button_group;
 	Label *msg;
+	Label *install_label;
 	LineEdit *project_path;
 	LineEdit *project_name;
 	LineEdit *install_path;
@@ -152,7 +153,7 @@ private:
 	String _test_path() {
 		DirAccess *d = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
 		
-		ProjectSettings::get_singleton()->call("load_settings_binary", "res://project.binary");
+		// ProjectSettings::get_singleton()->call("load_settings_binary", "res://project.binary");
 		String valid_path, valid_install_path;
 		if (d->change_dir(project_path->get_text()) == OK) {
 			valid_path = project_path->get_text();
@@ -195,7 +196,7 @@ private:
 			if (d->list_dir_begin() == OK) {
 				String currentFile = d->get_next();
 
-				while (currentFile != "") {
+				while (!currentFile.empty()) {
 					if (d->current_is_dir()) {
 						currentFile = d->get_next();
 						continue;
@@ -210,8 +211,8 @@ private:
 				d->list_dir_end();
 
 				if (!pcks.empty()) {
+					set_message("", MESSAGE_SUCCESS, PROJECT_PATH);
 					memdelete(d);
-					get_ok()->set_disabled(false);
 					return valid_path;
 				}
 			}
@@ -369,11 +370,13 @@ private:
 				get_ok()->set_disabled(false);
 			} else if (p.ends_with(".zip")) {
 				install_path->set_text(p.get_base_dir());
+				install_label->set_text(TTR("Project Installation Path:"));
 				install_path_container->show();
 				get_ok()->set_disabled(false);
 			} else if (p.ends_with(".pck")) {
 				p = p.get_base_dir();
 				install_path->set_text(p.get_base_dir());
+				install_label->set_text(TTR("Work Path:"));
 				install_path_container->show();
 				get_ok()->set_disabled(false);
 			}
@@ -406,6 +409,16 @@ private:
 		String sp = p_path.simplify_path();
 		install_path->set_text(sp);
 		_path_text_changed(sp);
+
+		if (DirAccess::exists(sp)) {
+			set_message("", MESSAGE_SUCCESS, INSTALL_PATH);
+			get_ok()->set_disabled(false);
+		}
+		else {
+			set_message(TTR("The path does not exist."), MESSAGE_ERROR, INSTALL_PATH);
+			get_ok()->set_disabled(true);
+		}
+		
 		get_ok()->call_deferred("grab_focus");
 	}
 
@@ -480,8 +493,10 @@ private:
 
 	void ok_pressed() {
 
+		String projectDir = project_path->get_text();
 		String dir = project_path->get_text();
-
+		bool isPck = false;
+		
 		if (mode == MODE_RENAME) {
 
 			String dir2 = _test_path();
@@ -518,6 +533,10 @@ private:
 
 					return;
 				}
+
+				// Not a zip so probably a pck
+				isPck = true;
+				dir = install_path->get_text();
 
 			} else {
 				if (mode == MODE_NEW) {
@@ -657,7 +676,11 @@ private:
 			dir = dir.replace("\\", "/");
 			if (dir.ends_with("/"))
 				dir = dir.substr(0, dir.length() - 1);
-			String proj = get_project_key_from_path(dir);
+			String proj = dir.replace("/", "::");
+
+			if (isPck)
+				EditorSettings::get_singleton()->set("projects-pck/" + proj, projectDir);
+			
 			EditorSettings::get_singleton()->set("projects/" + proj, dir);
 			EditorSettings::get_singleton()->save();
 
@@ -873,9 +896,9 @@ public:
 		install_path_container = memnew(VBoxContainer);
 		vb->add_child(install_path_container);
 
-		l = memnew(Label);
-		l->set_text(TTR("Project Installation Path:"));
-		install_path_container->add_child(l);
+		install_label = memnew(Label);
+		install_label->set_text(TTR("Project Installation Path:"));
+		install_path_container->add_child(install_label);
 
 		HBoxContainer *iphb = memnew(HBoxContainer);
 		install_path_container->add_child(iphb);
@@ -2083,25 +2106,35 @@ void ProjectManager::_open_selected_projects() {
 	for (const Set<String>::Element *E = selected_list.front(); E; E = E->next()) {
 		const String &selected = E->get();
 		String path = EditorSettings::get_singleton()->get("projects/" + selected);
+		String pckPath = EditorSettings::get_singleton()->get("projects-pck/" + selected);
 		String conf = path.plus_file("project.godot");
-		//if (!FileAccess::exists(conf)) {
-		//	dialog_error->set_text(vformat(TTR("Can't open project at '%s'."), path));
-		//	dialog_error->popup_centered_minsize();
-		//	return;
-		//}
+		if (!FileAccess::exists(conf) && !DirAccess::exists(pckPath)) {
+			dialog_error->set_text(vformat(TTR("Can't open project at '%s'."), path));
+			dialog_error->popup_centered_minsize();
+			return;
+		}
 
 		print_line("Editing project: " + path + " (" + selected + ")");
 
 		List<String> args;
 
-		args.push_back("--path");
-		args.push_back(path);
+		if (!pckPath.empty()) {
+			args.push_back("--main-pack");
+			args.push_back(pckPath);
 
-		args.push_back("--main-pack");
-		args.push_back(path);
+			args.push_back("--path");
+			args.push_back(pckPath);
+
+			args.push_back("--res-path");
+			args.push_back(path);
+			
+			args.push_back("--multi-pack");
+		} else {
+			args.push_back("--path");
+			args.push_back(path);
+		}
 		
 		args.push_back("--editor");
-		args.push_back("--multi-pack");
 
 		if (OS::get_singleton()->is_stdout_debug_enabled()) {
 			args.push_back("--debug");
@@ -2142,39 +2175,42 @@ void ProjectManager::_open_selected_projects_ask() {
 
 	// Update the project settings or don't open
 	String path = EditorSettings::get_singleton()->get("projects/" + selected_list.front()->key());
+	String pckPath = EditorSettings::get_singleton()->get("projects-pck/" + selected_list.front()->key());
 	String conf = path.plus_file("project.godot");
 
 	// FIXME: We already parse those in _load_recent_projects, we could instead make
 	// its `projects` list global and reuse its parsed metadata here.
-	//Ref<ConfigFile> cf = memnew(ConfigFile);
-	//Error cf_err = cf->load(conf);
+	if (pckPath.empty()) {
+		Ref<ConfigFile> cf = memnew(ConfigFile);
+		Error cf_err = cf->load(conf);
 
-	//if (cf_err != OK) {
-	//	dialog_error->set_text(vformat(TTR("Can't open project at '%s'."), path));
-	//	dialog_error->popup_centered_minsize();
-	//	return;
-	//}
+		if (cf_err != OK) {
+			dialog_error->set_text(vformat(TTR("Can't open project at '%s'."), path));
+			dialog_error->popup_centered_minsize();
+			return;
+		}
 
-	//int config_version = (int)cf->get_value("", "config_version", 0);
+		int config_version = (int)cf->get_value("", "config_version", 0);
 
-	//// Check if the config_version property was empty or 0
-	//if (config_version == 0) {
-	//	ask_update_settings->set_text(vformat(TTR("The following project settings file does not specify the version of Godot through which it was created.\n\n%s\n\nIf you proceed with opening it, it will be converted to Godot's current configuration file format.\nWarning: You will not be able to open the project with previous versions of the engine anymore."), conf));
-	//	ask_update_settings->popup_centered_minsize();
-	//	return;
-	//}
-	//// Check if we need to convert project settings from an earlier engine version
-	//if (config_version < ProjectSettings::CONFIG_VERSION) {
-	//	ask_update_settings->set_text(vformat(TTR("The following project settings file was generated by an older engine version, and needs to be converted for this version:\n\n%s\n\nDo you want to convert it?\nWarning: You will not be able to open the project with previous versions of the engine anymore."), conf));
-	//	ask_update_settings->popup_centered_minsize();
-	//	return;
-	//}
-	//// Check if the file was generated by a newer, incompatible engine version
-	//if (config_version > ProjectSettings::CONFIG_VERSION) {
-	//	dialog_error->set_text(vformat(TTR("Can't open project at '%s'.") + "\n" + TTR("The project settings were created by a newer engine version, whose settings are not compatible with this version."), path));
-	//	dialog_error->popup_centered_minsize();
-	//	return;
-	//}
+		// Check if the config_version property was empty or 0
+		if (config_version == 0) {
+			ask_update_settings->set_text(vformat(TTR("The following project settings file does not specify the version of Godot through which it was created.\n\n%s\n\nIf you proceed with opening it, it will be converted to Godot's current configuration file format.\nWarning: You will not be able to open the project with previous versions of the engine anymore."), conf));
+			ask_update_settings->popup_centered_minsize();
+			return;
+		}
+		// Check if we need to convert project settings from an earlier engine version
+		if (config_version < ProjectSettings::CONFIG_VERSION) {
+			ask_update_settings->set_text(vformat(TTR("The following project settings file was generated by an older engine version, and needs to be converted for this version:\n\n%s\n\nDo you want to convert it?\nWarning: You will not be able to open the project with previous versions of the engine anymore."), conf));
+			ask_update_settings->popup_centered_minsize();
+			return;
+		}
+		// Check if the file was generated by a newer, incompatible engine version
+		if (config_version > ProjectSettings::CONFIG_VERSION) {
+			dialog_error->set_text(vformat(TTR("Can't open project at '%s'.") + "\n" + TTR("The project settings were created by a newer engine version, whose settings are not compatible with this version."), path));
+			dialog_error->popup_centered_minsize();
+			return;
+		}
+	}
 
 	// Open if the project is up-to-date
 	_open_selected_projects();

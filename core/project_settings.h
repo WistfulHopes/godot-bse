@@ -130,6 +130,7 @@ public:
 	Variant property_get_revert(const String &p_name);
 
 	String get_resource_path() const;
+	void set_resource_path(const String& p_path);
 
 	static ProjectSettings *get_singleton();
 

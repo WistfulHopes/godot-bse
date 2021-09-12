@@ -535,8 +535,10 @@ private:
 				}
 
 				// Not a zip so probably a pck
-				isPck = true;
-				dir = install_path->get_text();
+				if (!install_path->get_text().empty()) {
+					isPck = true;
+					dir = install_path->get_text();	
+				}
 
 			} else {
 				if (mode == MODE_NEW) {
@@ -2102,11 +2104,12 @@ void ProjectManager::_open_selected_projects() {
 	loading_label->set_modulate(Color(1, 1, 1));
 
 	const Set<String> &selected_list = _project_list->get_selected_project_keys();
+	for (const Map<String, String>::Element *E = selected_list.front(); E; E = E->next()) {
+		const String &selected = E->key();
 
-	for (const Set<String>::Element *E = selected_list.front(); E; E = E->next()) {
-		const String &selected = E->get();
+		bool pckValid = false;
 		String path = EditorSettings::get_singleton()->get("projects/" + selected);
-		String pckPath = EditorSettings::get_singleton()->get("projects-pck/" + selected);
+		String pckPath = EditorSettings::get_singleton()->get("projects-pck/" + selected, &pckValid);
 		String conf = path.plus_file("project.godot");
 		if (!FileAccess::exists(conf) && !DirAccess::exists(pckPath)) {
 			dialog_error->set_text(vformat(TTR("Can't open project at '%s'."), path));
@@ -2118,7 +2121,7 @@ void ProjectManager::_open_selected_projects() {
 
 		List<String> args;
 
-		if (!pckPath.empty()) {
+		if (pckValid) {
 			args.push_back("--main-pack");
 			args.push_back(pckPath);
 
@@ -2173,14 +2176,16 @@ void ProjectManager::_open_selected_projects_ask() {
 		return;
 	}
 
+	bool pckValid = false;
+	
 	// Update the project settings or don't open
 	String path = EditorSettings::get_singleton()->get("projects/" + selected_list.front()->key());
-	String pckPath = EditorSettings::get_singleton()->get("projects-pck/" + selected_list.front()->key());
+	String pckPath = EditorSettings::get_singleton()->get("projects-pck/" + selected_list.front()->key(), &pckValid);
 	String conf = path.plus_file("project.godot");
 
 	// FIXME: We already parse those in _load_recent_projects, we could instead make
 	// its `projects` list global and reuse its parsed metadata here.
-	if (pckPath.empty()) {
+	if (!pckValid) {
 		Ref<ConfigFile> cf = memnew(ConfigFile);
 		Error cf_err = cf->load(conf);
 

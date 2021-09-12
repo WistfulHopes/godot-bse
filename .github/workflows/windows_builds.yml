@@ -66,4 +66,9 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: ${{ github.job }}
+        path: bin/*
+        
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}-lightweight
         path: bin/godot.windows.opt.tools.64.exe

@@ -58,8 +58,9 @@ jobs:
       run: |
         scons tools=yes target=release_debug
         ls -l bin/
-
-    - uses: actions/upload-artifact@v2
+        
+    - name: Upload artifact ${{ github.job }}
+      uses: actions/upload-artifact@v2
       with:
         name: ${{ github.job }}
         path: bin/*

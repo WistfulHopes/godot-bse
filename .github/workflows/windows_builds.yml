@@ -63,13 +63,13 @@ jobs:
         scons tools=yes target=release_debug
         ls -l bin/
         
-    - name: Upload artifact ${{ github.job }}
+    - name: Upload artifact windows-editor
       uses: actions/upload-artifact@v2
       with:
         name: ${{ github.job }}
         path: bin/*
         
-    - name: Upload artifact ${{ github.job }}-lightweight
+    - name: Upload artifact windows-editor-lightweight
       uses: actions/upload-artifact@v2
       with:
         name: ${{ github.job }}-lightweight

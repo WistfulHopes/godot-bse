@@ -40,6 +40,7 @@
 #include "core/os/keyboard.h"
 #include "core/os/os.h"
 #include "core/variant_parser.h"
+#include "core/io/dir_access_hybrid.h"
 
 #include <zlib.h>
 
@@ -315,6 +316,8 @@ Error ProjectSettings::_setup(const String &p_path, const String &p_main_pack, b
  */
 Error ProjectSettings::_setup(const String &p_path, const String &p_main_pack, bool p_upwards, bool p_multi_pack) {
 
+	main_pack_path = p_main_pack;
+	using_multipack = p_multi_pack;
 	// If looking for files in a network client, use it directly
 
 	if (FileAccessNetworkClient::get_singleton()) {
@@ -357,9 +360,7 @@ Error ProjectSettings::_setup(const String &p_path, const String &p_main_pack, b
 			}
 
 			using_datapack = true;
-			PackedData::get_singleton()->set_disabled(false);
-			DirAccess::make_default<DirAccessPack>(DirAccess::ACCESS_RESOURCES);
-			
+			DirAccess::make_default<DirAccessHybrid>(DirAccess::ACCESS_RESOURCES);
 			dir->list_dir_end();
 		}
 		
@@ -995,6 +996,14 @@ void ProjectSettings::set_setting(const String &p_setting, const Variant &p_valu
 
 Variant ProjectSettings::get_setting(const String &p_setting) const {
 	return get(p_setting);
+}
+
+String ProjectSettings::get_main_pack_path() const {
+	return main_pack_path;
+}
+
+bool ProjectSettings::is_multi_pack() const {
+	return using_multipack;
 }
 
 bool ProjectSettings::has_custom_feature(const String &p_feature) const {

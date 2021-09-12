@@ -83,9 +83,11 @@ protected:
 	int last_builtin_order;
 	Map<StringName, VariantContainer> props;
 	String resource_path;
+	String main_pack_path;
 	Map<StringName, PropertyInfo> custom_prop_info;
 	bool disable_feature_overrides;
 	bool using_datapack;
+	bool using_multipack;
 	List<String> input_presets;
 
 	Set<String> custom_features;
@@ -123,6 +125,8 @@ public:
 
 	void set_setting(const String &p_setting, const Variant &p_value);
 	Variant get_setting(const String &p_setting) const;
+	String get_main_pack_path() const;
+	bool is_multi_pack() const;
 
 	bool has_setting(String p_var) const;
 	String localize_path(const String &p_path) const;

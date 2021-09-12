@@ -464,16 +464,85 @@ String DirAccessPack::get_current_dir() {
 
 bool DirAccessPack::file_exists(String p_file) {
 
-	p_file = fix_path(p_file);
+	p_file = fix_path(p_file, false);
 
-	return current->files.has(p_file);
+	Vector<String> paths = p_file.split("/");
+	PackedData::PackedDir *pd = current;
+
+	for (int i = 0; i < paths.size(); i++) {
+		const String &p = paths[i];
+		bool is_file = i == paths.size() - 1;
+
+		if (p.empty())
+			continue;
+
+		if (is_file)
+			return pd->files.has(p);
+		
+		if (p == ".") {
+			continue;
+		} else if (p == "..") {
+			if (pd->parent) {
+				pd = pd->parent;
+				continue;
+			}
+
+			return false;
+		} else {
+			if (pd->subdirs.has(p)) {
+				pd = pd->subdirs[p];
+				continue;
+			}
+
+			return false;
+		}
+	}
+	
+	return false;
 }
 
 bool DirAccessPack::dir_exists(String p_dir) {
 
-	p_dir = fix_path(p_dir);
+	p_dir = fix_path(p_dir, false);
 
-	return current->subdirs.has(p_dir);
+	Vector<String> paths = p_dir.split("/");
+
+	PackedData::PackedDir* pd = current;
+	bool found = false;
+
+	for (int i = 0; i < paths.size(); i++) {
+		const String& p = paths[i];
+
+		if (p.empty())
+			continue;
+		
+		if (p == ".") {
+			found = true;
+			continue;
+		}
+		else if (p == "..") {
+			if (pd->parent) {
+				pd = pd->parent;
+				found = true;
+				continue;
+			}
+
+			found = false;
+			break;
+		}
+		else {
+			if (pd->subdirs.has(p)) {
+				found = true;
+				pd = pd->subdirs[p];
+				continue;
+			}
+
+			found = false;
+			break;
+		}
+	}
+	
+	return found;
 }
 
 Error DirAccessPack::make_dir(String p_dir) {

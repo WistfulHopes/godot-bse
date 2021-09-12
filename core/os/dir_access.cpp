@@ -191,7 +191,7 @@ String DirAccess::get_next(bool *p_is_dir) {
 	return next;
 }
 
-String DirAccess::fix_path(String p_path) const {
+String DirAccess::fix_path(String p_path, bool p_make_absolute) const {
 
 	switch (_access_type) {
 
@@ -201,7 +201,7 @@ String DirAccess::fix_path(String p_path) const {
 				if (p_path.begins_with("res://")) {
 
 					String resource_path = ProjectSettings::get_singleton()->get_resource_path();
-					if (resource_path != "") {
+					if (resource_path != "" && p_make_absolute) {
 
 						return p_path.replace_first("res:/", resource_path);
 					};
@@ -215,7 +215,7 @@ String DirAccess::fix_path(String p_path) const {
 			if (p_path.begins_with("user://")) {
 
 				String data_dir = OS::get_singleton()->get_user_data_dir();
-				if (data_dir != "") {
+				if (data_dir != "" && p_make_absolute) {
 
 					return p_path.replace_first("user:/", data_dir);
 				};

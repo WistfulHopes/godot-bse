@@ -47,11 +47,29 @@ Error EditorRun::run(const String &p_scene, const String &p_custom_args, const L
 	List<String> args;
 
 	String resource_path = ProjectSettings::get_singleton()->get_resource_path();
+	String pack_path = ProjectSettings::get_singleton()->get_main_pack_path();
+	bool multi_pack = (int)ProjectSettings::get_singleton()->is_multi_pack();
 	String remote_host = EditorSettings::get_singleton()->get("network/debug/remote_host");
 	int remote_port = (int)EditorSettings::get_singleton()->get("network/debug/remote_port");
 
-	if (resource_path != "") {
+	if (!pack_path.empty()) {
+		args.push_back("--main-pack");
+		args.push_back(pack_path);
+	}
+
+	if (multi_pack) {
 		args.push_back("--path");
+		args.push_back(pack_path);
+		
+		args.push_back("--multi-pack");
+	}
+	
+	if (resource_path != "") {
+		if (!multi_pack && !pack_path.empty())
+			args.push_back("--path");
+		else
+			args.push_back("--res-path");
+		
 		args.push_back(resource_path.replace(" ", "%20"));
 	}
 
@@ -188,7 +206,7 @@ Error EditorRun::run(const String &p_scene, const String &p_custom_args, const L
 			args.push_back(cargs[i].replace(" ", "%20"));
 		}
 	}
-
+	
 	String exec = OS::get_singleton()->get_executable_path();
 
 	printf("Running: %ls", exec.c_str());

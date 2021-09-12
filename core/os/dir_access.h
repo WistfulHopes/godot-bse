@@ -56,7 +56,7 @@ protected:
 	String _get_root_path() const;
 	String _get_root_string() const;
 
-	String fix_path(String p_path) const;
+	String fix_path(String p_path, bool p_make_absolute = true) const;
 	bool next_is_dir;
 
 	template <class T>
@@ -111,6 +111,14 @@ public:
 	static String get_full_path(const String &p_path, AccessType p_access);
 	static DirAccess *create_for_path(const String &p_path);
 
+	AccessType get_access_type() const {
+		return _access_type;
+	}
+
+	void set_access_type(AccessType p_access_type) {
+		_access_type = p_access_type;
+	}
+	
 	/*
 	enum DirType {
 

@@ -99,7 +99,7 @@ jobs:
     - name: Configuring Python packages
       run: |
         python -c "import sys; print(sys.version)"
-        python -m pip install scons
+        pip install scons==3.1.2
         python --version
         scons --version
 

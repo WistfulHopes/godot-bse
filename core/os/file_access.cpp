@@ -95,28 +95,24 @@ Error FileAccess::reopen(const String &p_path, int p_mode_flags) {
 
 FileAccess *FileAccess::open(const String &p_path, int p_mode_flags, Error *r_error) {
 
-	//try packed data first
-
-	FileAccess *ret = NULL;
-	if (!(p_mode_flags & WRITE) && PackedData::get_singleton() && !PackedData::get_singleton()->is_disabled()) {
-		ret = PackedData::get_singleton()->try_open_path(p_path);
-		if (ret) {
-			if (r_error)
-				*r_error = OK;
-			return ret;
-		}
-	}
-
-	ret = create_for_path(p_path);
+	FileAccess *ret = create_for_path(p_path);
 	Error err = ret->_open(p_path, p_mode_flags);
 
-	if (r_error)
-		*r_error = err;
 	if (err != OK) {
 
 		memdelete(ret);
 		ret = NULL;
+
+		if (!(p_mode_flags & WRITE) && PackedData::get_singleton() && !PackedData::get_singleton()->is_disabled()) {
+
+			ret = PackedData::get_singleton()->try_open_path(p_path);
+			if (ret)
+				err = OK;
+		}
 	}
+
+	if (r_error)
+		*r_error = err;
 
 	return ret;
 }
@@ -495,16 +491,15 @@ void FileAccess::store_double(double p_dest) {
 };
 
 uint64_t FileAccess::get_modified_time(const String &p_file) {
-
-	if (PackedData::get_singleton() && !PackedData::get_singleton()->is_disabled() && PackedData::get_singleton()->has_path(p_file))
-		return 0;
-
+	
 	FileAccess *fa = create_for_path(p_file);
-	ERR_FAIL_COND_V(!fa, 0);
-
-	uint64_t mt = fa->_get_modified_time(p_file);
-	memdelete(fa);
-	return mt;
+	if (fa) {
+		uint64_t mt = fa->_get_modified_time(p_file);
+		memdelete(fa);
+		return mt;
+	}
+	
+	return 0;
 }
 
 void FileAccess::store_string(const String &p_string) {

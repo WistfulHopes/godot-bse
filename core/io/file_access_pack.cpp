@@ -496,11 +496,15 @@ String DirAccessPack::get_current_dir() {
 
 bool DirAccessPack::file_exists(String p_file) {
 
+	bool absolute = p_file.begins_with("res://") || p_file.begins_with("/");
 	p_file = fix_path(p_file, false);
 
 	Vector<String> paths = p_file.split("/");
 	PackedData::PackedDir *pd = current;
 
+	if (absolute)
+		pd = PackedData::get_singleton()->root;
+	
 	for (int i = 0; i < paths.size(); i++) {
 		const String &p = paths[i];
 		bool is_file = i == paths.size() - 1;
@@ -535,6 +539,7 @@ bool DirAccessPack::file_exists(String p_file) {
 
 bool DirAccessPack::dir_exists(String p_dir) {
 
+	bool absolute = p_dir.begins_with("res://") || p_dir.begins_with("/");
 	p_dir = fix_path(p_dir, false);
 
 	Vector<String> paths = p_dir.split("/");
@@ -542,6 +547,9 @@ bool DirAccessPack::dir_exists(String p_dir) {
 	PackedData::PackedDir* pd = current;
 	bool found = false;
 
+	if (absolute)
+		pd = PackedData::get_singleton()->root;
+	
 	for (int i = 0; i < paths.size(); i++) {
 		const String& p = paths[i];
 

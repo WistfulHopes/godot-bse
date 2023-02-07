@@ -10,7 +10,7 @@ Modified Godot to have better support for Sonic Colours: Ultimate.
 
 # How to Import a specific Blind Squirrel PCK Project
 - Download [SCU_GDScript.7z](https://github.com/hedge-dev/godot-bse/releases/download/acorn-1.1.1/SCU_GDScript.7z) and extract it to a folder in your computer. This will be your "work" folder.
-- Download the latest release from "Releases" and run the executable **using the provided batch file!**
+- Download the latest release from [Releases](https://github.com/hedge-dev/godot-bse) and run the executable **using the provided batch file!**
 - In the Project Manager, select Import.
 ![](./.github/readme-images/import.png)
 - Select `sonic0.pck` as the project path, and use the folder you previously created as the work folder. The work folder will be where you will place your modified files, alongside the decompiled scripts you downloaded.

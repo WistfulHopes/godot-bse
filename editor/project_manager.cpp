@@ -2104,8 +2104,8 @@ void ProjectManager::_open_selected_projects() {
 	loading_label->set_modulate(Color(1, 1, 1));
 
 	const Set<String> &selected_list = _project_list->get_selected_project_keys();
-	for (const Map<String, String>::Element *E = selected_list.front(); E; E = E->next()) {
-		const String &selected = E->key();
+	for (const Set<String>::Element *E = selected_list.front(); E; E = E->next()) {
+		const String &selected = E->get();
 
 		bool pckValid = false;
 		String path = EditorSettings::get_singleton()->get("projects/" + selected);
@@ -2179,8 +2179,8 @@ void ProjectManager::_open_selected_projects_ask() {
 	bool pckValid = false;
 	
 	// Update the project settings or don't open
-	String path = EditorSettings::get_singleton()->get("projects/" + selected_list.front()->key());
-	String pckPath = EditorSettings::get_singleton()->get("projects-pck/" + selected_list.front()->key(), &pckValid);
+	String path = EditorSettings::get_singleton()->get("projects/" + selected_list.front()->get());
+	String pckPath = EditorSettings::get_singleton()->get("projects-pck/" + selected_list.front()->get(), &pckValid);
 	String conf = path.plus_file("project.godot");
 
 	// FIXME: We already parse those in _load_recent_projects, we could instead make

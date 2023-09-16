@@ -133,7 +133,6 @@ public:
 	
 	void set_cast_character_shadows_setting(ShadowCastingSetting p_shadow_casting_setting);
 	ShadowCastingSetting get_cast_character_shadows_setting() const;
-<<<<<<< HEAD
 
 	void set_bake_cast_shadows(bool p_enabled);
 	bool get_bake_cast_shadows();
@@ -143,8 +142,6 @@ public:
 
 	void set_lightmap_scale(LightmapScale p_scale);
 	LightmapScale get_lightmap_scale() const;
-=======
->>>>>>> 1e3e3af24c (Merge pull request #2 from DarioSamo/bse)
 
 	void set_lod_min_distance(float p_dist);
 	float get_lod_min_distance() const;

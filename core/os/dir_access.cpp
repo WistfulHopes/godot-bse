@@ -188,13 +188,13 @@ Error DirAccess::make_dir_recursive(String p_dir) {
 	return OK;
 }
 
-String DirAccess::get_next(bool *p_is_dir) {
+// String DirAccess::get_next(bool *p_is_dir) {
 
-	String next = get_next();
-	if (p_is_dir)
-		*p_is_dir = current_is_dir();
-	return next;
-}
+// 	String next = get_next();
+// 	if (p_is_dir)
+// 		*p_is_dir = current_is_dir();
+// 	return next;
+// }
 
 String DirAccess::fix_path(String p_path, bool p_make_absolute) const {
 

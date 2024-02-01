@@ -171,6 +171,7 @@
 
 #include "scene/3d/spatial.h"
 #include "scene/3d/world_environment.h"
+#include "scene/3d/environment_root.h"
 
 #ifndef _3D_DISABLED
 #include "scene/3d/area.h"
@@ -462,6 +463,7 @@ void register_scene_types() {
 	ClassDB::register_class<VisibilityNotifier>();
 	ClassDB::register_class<VisibilityEnabler>();
 	ClassDB::register_class<WorldEnvironment>();
+	ClassDB::register_class<EnvironmentRoot>();
 	ClassDB::register_class<RemoteTransform>();
 
 	ClassDB::register_virtual_class<Joint>();

@@ -47,7 +47,7 @@ jobs:
     - name: Configuring Python packages
       run: |
         python -c "import sys; print(sys.version)"
-        python -m pip install scons
+        python -m pip install scons==4.5.2
         python --version
         scons --version
 

@@ -13,6 +13,8 @@ private:
 	Error err_os;
 	Error err_pack;
 
+	String cur_dir;
+
 	List<String> list_dirs;
 	List<String> list_files;
 

@@ -368,17 +368,17 @@ Error ProjectSettings::_setup(const String &p_path, const String &p_main_pack, b
 
 			ERR_FAIL_COND_V(err != OK, ERR_CANT_OPEN);
 
-			String currentFile = dir->get_next();
+			String current_file = dir->get_next();
 
-			while (currentFile != "") {
-				if (!currentFile.ends_with(".pck") || dir->current_is_dir()) {
-					currentFile = dir->get_next();
+			while (current_file != "") {
+				if (dir->current_is_dir() || (!current_file.ends_with(".zip") && !current_file.ends_with(".pck"))) {
+					current_file = dir->get_next();
 					continue;
 				}
 
-				printf("Add pack: %ls\n", currentFile.c_str());
-				PackedData::get_singleton()->add_pack(currentFile);
-				currentFile = dir->get_next();
+				printf("Add pack: %ls\n", current_file.c_str());
+				PackedData::get_singleton()->add_pack(current_file);
+				current_file = dir->get_next();
 			}
 
 			using_datapack = true;

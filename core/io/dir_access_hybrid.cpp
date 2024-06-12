@@ -43,6 +43,8 @@ Error DirAccessHybrid::list_dir_begin() {
 		dir_access_pack->list_dir_end();
 	}
 
+	cdir = !list_dirs.empty();
+
 	return OK;
 }
 
@@ -91,28 +93,44 @@ String DirAccessHybrid::get_drive(int p_drive) {
 
 Error DirAccessHybrid::change_dir(String p_dir) {
 
-	dir_access_os->set_access_type(get_access_type());
-	dir_access_pack->set_access_type(get_access_type());
+	String old_dir = cur_dir;
 
-	err_pack = dir_access_pack->change_dir(p_dir);
-
-	if (err_pack == OK) {
-		err_os = dir_access_os->change_dir(dir_access_pack->get_current_dir());
-	} else {
+	if (p_dir.begins_with("res://") || p_dir.begins_with("/")) {
 		err_os = dir_access_os->change_dir(p_dir);
+		err_pack = dir_access_pack->change_dir(p_dir);
+		cur_dir = p_dir;
+	} else {
 		if (err_os == OK) {
-			err_pack = dir_access_pack->change_dir(dir_access_os->get_current_dir());
+			err_os = dir_access_os->change_dir(p_dir);
+		}
+		if (err_os == OK) {
+			cur_dir = dir_access_os->get_current_dir();
+			err_pack = dir_access_pack->change_dir(cur_dir);
+		} else if (err_pack == OK) {
+			err_pack = dir_access_pack->change_dir(p_dir);
+			if (err_pack == OK) {
+				cur_dir = dir_access_pack->get_current_dir();
+				err_os = dir_access_os->change_dir(cur_dir);
+			}
 		}
 	}
 
-	return err_os == OK || err_pack == OK ? OK : ERR_INVALID_PARAMETER;
+	if (err_os == OK || err_pack == OK) {
+		return OK;
+	}
+
+	err_os = dir_access_os->change_dir(old_dir);
+	err_pack = dir_access_pack->change_dir(old_dir);
+	cur_dir = old_dir;
+
+	return ERR_INVALID_PARAMETER;
 }
 
 String DirAccessHybrid::get_current_dir() {
 
 	return err_os == OK	  ? dir_access_os->get_current_dir() :
 		   err_pack == OK ? dir_access_pack->get_current_dir() :
-							  "";
+							cur_dir;
 }
 
 Error DirAccessHybrid::make_dir(String p_dir) {
@@ -166,12 +184,17 @@ String DirAccessHybrid::get_filesystem_type() const {
 	return dir_access_os->get_filesystem_type();
 }
 
-DirAccessHybrid::DirAccessHybrid(){
-		dir_access_os = DirAccess::create(AccessType::ACCESS_FILESYSTEM);
-		dir_access_pack = memnew(DirAccessPack);
-		err_os = OK;
-		err_pack = OK;
-		cdir = false;
+DirAccessHybrid::DirAccessHybrid() {
+
+	dir_access_os = DirAccess::create(AccessType::ACCESS_FILESYSTEM);
+	dir_access_os->set_access_type(AccessType::ACCESS_RESOURCES);
+
+	dir_access_pack = memnew(DirAccessPack);
+	dir_access_pack->set_access_type(AccessType::ACCESS_RESOURCES);
+
+	err_os = OK;
+	err_pack = OK;
+	cdir = false;
 }
 
 DirAccessHybrid::~DirAccessHybrid() {

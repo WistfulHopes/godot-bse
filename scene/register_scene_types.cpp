@@ -154,6 +154,7 @@
 #include "scene/resources/primitive_meshes.h"
 #include "scene/resources/ray_shape.h"
 #include "scene/resources/rectangle_shape_2d.h"
+#include "scene/resources/resource_bundle.h"
 #include "scene/resources/resource_format_text.h"
 #include "scene/resources/segment_shape_2d.h"
 #include "scene/resources/sky.h"
@@ -598,6 +599,8 @@ void register_scene_types() {
 	OS::get_singleton()->yield(); //may take time to init
 
 	/* REGISTER RESOURCES */
+
+	ClassDB::register_class<ResourceBundle>();
 
 	ClassDB::register_virtual_class<Shader>();
 	ClassDB::register_class<ParticlesMaterial>();

@@ -99,6 +99,18 @@ thirdparty_minizip_sources = [
 thirdparty_minizip_sources = [thirdparty_minizip_dir + file for file in thirdparty_minizip_sources]
 env_thirdparty.add_source_files(thirdparty_obj, thirdparty_minizip_sources)
 
+# MinHook library
+thirdparty_minhook_dir = "#thirdparty/minhook/"
+thirdparty_minhook_sources = [
+    "src/buffer.c",
+    "src/hook.c",
+    "src/trampoline.c",
+    "src/hde/hde32.c",
+    "src/hde/hde64.c",
+]
+thirdparty_minhook_sources = [thirdparty_minhook_dir + file for file in thirdparty_minhook_sources]
+env_thirdparty.add_source_files(thirdparty_obj, thirdparty_minhook_sources)
+
 # Zstd library, can be unbundled in theory
 # though we currently use some private symbols
 # https://github.com/godotengine/godot/issues/17374

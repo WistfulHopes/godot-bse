@@ -3389,43 +3389,19 @@ void GDScriptParser::_parse_block(BlockNode *p_block, bool p_static) {
 			case GDScriptTokenizer::TK_PR_ASSERT: {
 
 				tokenizer->advance();
-
-				if (tokenizer->get_token() != GDScriptTokenizer::TK_PARENTHESIS_OPEN) {
-					_set_error("Expected '(' after assert");
+				Node *condition = _parse_and_reduce_expression(p_block, p_static);
+				if (!condition) {
+					if (_recover_from_completion()) {
+						break;
+					}
 					return;
 				}
-
-				int assert_line = tokenizer->get_token_line();
-
-				tokenizer->advance();
-
-				Vector<Node *> args;
-				const bool result = _parse_arguments(p_block, args, p_static);
-				if (!result) {
-					return;
-				}
-
-				if (args.empty() || args.size() > 2) {
-					_set_error("Wrong number of arguments, expected 1 or 2", assert_line);
-					return;
-				}
-
 				AssertNode *an = alloc_node<AssertNode>();
-				an->condition = _reduce_expression(args[0], p_static);
-				an->line = assert_line;
-
-				if (args.size() == 2) {
-					an->message = _reduce_expression(args[1], p_static);
-				} else {
-					ConstantNode *message_node = alloc_node<ConstantNode>();
-					message_node->value = String();
-					an->message = message_node;
-				}
-
+				an->condition = condition;
 				p_block->statements.push_back(an);
 
 				if (!_end_statement()) {
-					_set_end_statement_error("assert");
+					_set_error("Expected end of statement after assert.");
 					return;
 				}
 			} break;
@@ -8266,14 +8242,9 @@ void GDScriptParser::_check_block_types(BlockNode *p_block) {
 		Node *statement = E->get();
 		switch (statement->type) {
 			case Node::TYPE_NEWLINE:
-			case Node::TYPE_BREAKPOINT: {
-				// Nothing to do
-			} break;
+			case Node::TYPE_BREAKPOINT:
 			case Node::TYPE_ASSERT: {
-				AssertNode *an = static_cast<AssertNode *>(statement);
-				_mark_line_as_safe(an->line);
-				_reduce_node_type(an->condition);
-				_reduce_node_type(an->message);
+				// Nothing to do
 			} break;
 			case Node::TYPE_LOCAL_VAR: {
 				LocalVarNode *lv = static_cast<LocalVarNode *>(statement);

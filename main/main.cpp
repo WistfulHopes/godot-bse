@@ -63,6 +63,7 @@
 #include "scene/main/viewport.h"
 #include "scene/register_scene_types.h"
 #include "scene/resources/packed_scene.h"
+#include "acorn/register_acorn_types.h"
 #include "servers/arvr_server.h"
 #include "servers/audio_server.h"
 #include "servers/camera_server.h"
@@ -78,6 +79,8 @@
 #include "editor/progress_dialog.h"
 #include "editor/project_manager.h"
 #endif
+
+#include "acorn/acorn_runner.h"
 
 /* Static members */
 
@@ -1445,6 +1448,10 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 
 	register_scene_types();
 
+	MAIN_PRINT("Main: Load Acorn Types");
+
+	register_acorn_types();
+
 #ifdef TOOLS_ENABLED
 	ClassDB::set_current_api(ClassDB::API_EDITOR);
 	EditorNode::register_editor_types();
@@ -2135,6 +2142,17 @@ bool Main::iteration() {
 
 	Engine::get_singleton()->_in_physics = false;
 
+	if (!editor && !project_manager)
+	{
+		if (!AcornRunner::initialized)
+		{
+			AcornRunner::_init();
+			AcornRunner::initialized = true;
+		}
+
+		AcornRunner::_process(OS::get_singleton()->get_ticks_usec());
+	}
+
 	uint64_t idle_begin = OS::get_singleton()->get_ticks_usec();
 
 	if (OS::get_singleton()->get_main_loop()->idle(step * time_scale)) {
@@ -2283,6 +2301,7 @@ void Main::cleanup(bool p_force) {
 	unregister_driver_types();
 	unregister_module_types();
 	unregister_platform_apis();
+	unregister_acorn_types();
 	unregister_scene_types();
 	unregister_server_types();
 

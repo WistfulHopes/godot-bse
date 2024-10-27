@@ -6,16 +6,14 @@
 
 class AcornRunner {
 
-private:
-	static HMODULE m_DLL;
-
 public:
+	static HMODULE m_DLL;
 	static bool initialized;
 
 	AcornRunner();
 
 	static void _init();
-	static void apply_hooks();
+	static bool apply_hooks();
 	static void _process(float delta);
 };
 
